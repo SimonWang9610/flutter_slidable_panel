@@ -82,6 +82,7 @@ class SlidablePanel extends StatelessWidget {
           axis == Axis.horizontal ? controller.onDragEnd : null,
       onVerticalDragEnd: axis == Axis.vertical ? controller.onDragEnd : null,
       child: _SlidablePanel(
+        key: key,
         controller: controller,
         axis: axis,
         maxSlideThreshold: maxSlideThreshold,

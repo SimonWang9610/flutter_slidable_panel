@@ -7,7 +7,7 @@ const double _upperBound = 1;
 const double _middleBound = 0;
 const double _kSlideRatioTolerance = 0.15;
 
-class SlideController extends _SlideAnimator with DragForSlide {
+class SlideController extends SlideAnimator with DragForSlide {
   /// the ratio of triggering the [SlideActionPanel] to the next position
   /// when users try to drag the [SlidablePanel]
   /// default to [_kSlideRatioTolerance]
@@ -79,7 +79,7 @@ class SlideController extends _SlideAnimator with DragForSlide {
   }
 }
 
-class _SlideAnimator extends TickerProvider with ChangeNotifier {
+class SlideAnimator extends TickerProvider with ChangeNotifier {
   @override
   Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
 
@@ -109,7 +109,7 @@ class _SlideAnimator extends TickerProvider with ChangeNotifier {
   }
 }
 
-mixin DragForSlide on _SlideAnimator {
+mixin DragForSlide on SlideAnimator {
   LayoutSize? _layoutSize;
   LayoutSize? get layoutSize => _layoutSize;
 
