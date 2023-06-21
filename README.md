@@ -11,9 +11,13 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-A Slidable Panel that can show actions in different positions. Also can expand the action item when the panel is opening
+A high-performant slidable Panel that can show actions in different positions, and also can expand the action item when the panel is opening
 
 ## Features
+
+1. When the panel is closed/dismissed, no actions would be painted and laid out.
+2. The animation of actions (e.g., expanding/collapsing a specific action) will be scoped and not result in the re-layout and re-painting of the entire `SlidablePanel`
+3. control the `SlidablePanel` and actions programmatically using `SlideController`, not limited to gestures.
 
 ### All action widgets can be expanded when the `SlidablePanel` is opening.
 
@@ -52,13 +56,14 @@ class SizedSlidableExample extends StatefulWidget {
 }
 
 class _SizedSlidableExampleState extends State<SizedSlidableExample> {
-  final SlideController _slideController = SlideController();
-  final ActionController _actionController = ActionController();
+  final SlideController _slideController = SlideController(
+    usePreActionController: true,
+    usePostActionController: true,
+  );
 
   @override
   void dispose() {
     _slideController.dispose();
-    _actionController.dispose();
     super.dispose();
   }
 
@@ -73,46 +78,58 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
           controller: _slideController,
           maxSlideThreshold: 0.8,
           axis: Axis.horizontal,
-          preActionPanel: SlideActionPanel(
-            actionLayout: ActionLayout.spaceEvenly(ActionMotion.scroll),
-            slidePercent: _slideController.slidePercent,
-            /// bind [ActionController] with the [SlideActionPanel]
-            controller: _actionController,
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _actionController.toggle(0);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
-                  shape: const RoundedRectangleBorder(),
-                ),
-                child: const Text("Archive"),
+          preActions: [
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(0);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.greenAccent,
+                shape: const RoundedRectangleBorder(),
               ),
-              TextButton(
-                onPressed: () {
-                  _actionController.toggle(1);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: const RoundedRectangleBorder(),
-                ),
-                child: const Text("Delete"),
+              child: const Text("PreAction"),
+            ),
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(1);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: const RoundedRectangleBorder(),
               ),
-            ],
-          ),
+              child: const Text("PreAction"),
+            ),
+          ],
+          postActions: [
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(0);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.greenAccent,
+                shape: const RoundedRectangleBorder(),
+              ),
+              child: const Text("PostAction"),
+            ),
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(1);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: const RoundedRectangleBorder(),
+              ),
+              child: const Text("PostAction"),
+            ),
+          ],
           child: GestureDetector(
             onTap: () {
-              _slideController.dismiss(
-                onDismissed: () {
-                  _actionController.reset();
-                },
-              );
+              _slideController.dismiss();
             },
             child: const DecoratedBox(
               decoration: BoxDecoration(color: Colors.blue),
               child: SizedBox(
-                width: 200,
+                width: 250,
                 height: 100,
                 child: Center(
                   child: Text(
@@ -127,66 +144,113 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
     );
   }
 }
+
 ```
 
 ## Usage
 
-### Animating during sliding
+### create a `SlideController`
 
-- When creating `SlideActionPanel`, you should pass `SlideController.slidePercent` to `SlideActionPanel.slidePercent`, so that `SlideActionPanel` could listen to the changes during sliding, like:
+- `usePreActionController` indicates if you want to enable expanding/collapsing the pre actions
+- `usePostActionController` indicates if you want to enable expanding/collapsing the post actions.
+
+> if [usePreActionController] or [usePostActionController] is set to true, the corresponding [ActionController] would be created and bound to [RenderSlideAction] automatically
+
+- invoking [SlideController.expand]/[SlideController.collapse]/[SlideController.toggleAction] only takes effects for two cases:
+  1. [usePreActionController] is true and the current [openedPosition] is [ActionPosition.pre]
+  2. [usePostActionController] is true and the current [openedPosition] is [ActionPosition.post]
 
 ```dart
-SlideActionPanel(
-    /// other codes
-    slidePercent: _slideController.slidePercent,
-    /// other codes
-),
+  final SlideController _slideController = SlideController(
+    usePreActionController: true,
+    usePostActionController: true,
+  );
 ```
 
-### Expand a specific action widget
+## Use `SlideController` programmatically
 
-When the `SlidablePanel` is opening, you could use `ActionController` to expand/collapse an action widget at the specific `index`
-
-1. bind `ActionController` with the `SlideActionPanel`.
-   > if you does not pass an `ActionController` to `SlideActionPanel`, invoking `ActionController.expand/collapse` would have no effect.
+### open the panel
 
 ```dart
-final _actionController = ActionController();
-/// other codes
-SlideActionPanel(
-    /// other codes
-    controller: _actionController,
-    /// other codes
-),
+SlideController.open({
+    ActionPosition position = ActionPosition.pre,
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 300),
+    VoidCallback? onOpened,
+  });
 ```
 
-2. invoking `ActionController.expand/collapse`
+### dismiss the panel
 
 ```dart
-TextButton(
-    onPressed: () {
-        _actionController.expand(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.linear,
-        )
-    },
-    style: TextButton.styleFrom(
-        backgroundColor: Colors.greenAccent,
-        shape: const RoundedRectangleBorder(),
-    ),
-    child: const Text("Archive"),
-),
+SlideController.dismiss({
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 300),
+    VoidCallback? onDismissed,
+  })
 ```
 
-## Limitations
-
-- `ActionController` must be reset manually by invoking `ActionController.reset()`; otherwise, the `SlidablePanel` would keep the expanded state after dismissing and opening again`.
+### check the current opened position
 
 ```dart
-_slideController.dismiss(
-    onDismissed: () {
-        _actionController.reset();
-    },
-);
+SlideController.openedPosition
+```
+
+- opened `ActionPosition.pre` for horizontal and vertical
+<div> 
+    <img src="https://github.com/SimonWang9610/flutter_slidable_panel/blob/main/images/h_pre.png?raw=true" width="160">
+    <img src="https://github.com/SimonWang9610/flutter_slidable_panel/blob/main/images/v_pre.png?raw=true" width="160">
+</div>
+
+- opened `ActionPosition.post` for horizontal and vertical
+<div> 
+    <img src="https://github.com/SimonWang9610/flutter_slidable_panel/blob/main/images/h_post.png?raw=true" width="160">
+    <img src="https://github.com/SimonWang9610/flutter_slidable_panel/blob/main/images/v_post.png?raw=true" width="160">
+</div>
+
+### expand the `index` action at the opened position
+
+`index` is the index in `SlidablePanel.preActions` or `SlidablePanel.postActions`
+
+> it will try to expand the `index` action at the current opened position if this panel is opened;
+
+> if this panel is closed/dismissed, it has no effects
+
+> if the current opened position has no associated `ActionController`, it also has no effects
+
+> you could associate `ActionController` to a specific position by setting `usePreActionController` or `usePostActionController` as `true`.
+
+```dart
+SlideController.expand(
+    int index, {
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 150),
+  })
+```
+
+### collapse the `index` action at the opened position
+
+```dart
+SlideController.collapse(
+    int index, {
+    required ActionPosition position,
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 150),
+  })
+```
+
+### toggle the `index` action at the opened position
+
+```dart
+SlideController.toggleAction(
+    int index, {
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 150),
+  })
+```
+
+#### detect if the `index` action is expanded
+
+```dart
+bool SlideController.hasExpandedAt(int index)
 ```

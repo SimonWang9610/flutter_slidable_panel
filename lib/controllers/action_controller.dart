@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_slidable_panel/flutter_slidable_panel.dart';
 
 /// use [ActionController] to control the animation of [SlideActionPanel] when the [SlidablePanel] is open
-/// for example, you can use [ActionController] to expand the action item to occupy the entire [SlideActionPanel]
+/// for example, you can use [ActionController] to expand the action item to fill the entire [SlideActionPanel]
 final class ActionController extends TickerProvider with ChangeNotifier {
   late final AnimationController _animationController = AnimationController(
     vsync: this,
@@ -25,7 +26,7 @@ final class ActionController extends TickerProvider with ChangeNotifier {
   /// the current progress of the animation during expanding or collapsing
   /// it indicates the [index] item is expanding if the progress is increasing from 0 to 1
   /// it indicates the [index] item is collapsing if the progress is decreasing from 1 to 0
-  double? get progress => _animationController.value;
+  double get progress => _animationController.value;
 
   /// expand the [index] item to occupy the entire [SlideActionPanel]
   Future<void> expand(
@@ -84,4 +85,111 @@ final class ActionController extends TickerProvider with ChangeNotifier {
 
   @override
   Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
+}
+
+mixin PositionedActionControlMixin {
+  ActionController? get preActionController;
+  ActionController? get postActionController;
+
+  /// get the current opened actions position
+  /// it would be [ActionPosition.pre] or [ActionPosition.post]
+  /// if the [SlidablePanel] is not open, it would be null
+  ActionPosition? get openedPosition;
+
+  /// toggle the action item at [index] according to the [openedPosition]
+  /// if [index] has been expanded, it would collapse
+  /// if [index] has not been expanded, it would expand
+  ///
+  /// if the [openedPosition] is null, it would do nothing
+  Future<void> toggleAction(
+    int index, {
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 150),
+  }) async {
+    switch (openedPosition) {
+      case ActionPosition.pre:
+        await preActionController?.toggle(
+          index,
+          curve: curve,
+          duration: duration,
+        );
+        break;
+      case ActionPosition.post:
+        await postActionController?.toggle(
+          index,
+          curve: curve,
+          duration: duration,
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  /// expand the [index] to occupy the opened action panel according to the [openedPosition]
+  /// if the [openedPosition] is null, it would do nothing
+  Future<void> expand(
+    int index, {
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 150),
+  }) async {
+    switch (openedPosition) {
+      case ActionPosition.pre:
+        await preActionController?.expand(
+          index,
+          curve: curve,
+          duration: duration,
+        );
+        break;
+      case ActionPosition.post:
+        await postActionController?.expand(
+          index,
+          curve: curve,
+          duration: duration,
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  /// collapse the [index] to the original position according to the [openedPosition]
+  /// if the [openedPosition] is null, it would do nothing
+  Future<void> collapse(
+    int index, {
+    required ActionPosition position,
+    Curve curve = Curves.easeInOut,
+    Duration duration = const Duration(milliseconds: 150),
+  }) async {
+    switch (openedPosition) {
+      case ActionPosition.pre:
+        await preActionController?.collapse(
+          index,
+          curve: curve,
+          duration: duration,
+        );
+        break;
+      case ActionPosition.post:
+        await postActionController?.collapse(
+          index,
+          curve: curve,
+          duration: duration,
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  /// whether the [index] item is expanded according to the [openedPosition]
+  /// if the [openedPosition] is null, it would return false
+  /// if there is no [ActionController] at the [openedPosition], it would return false
+  bool hasExpandedAt(int index) {
+    return switch (openedPosition) {
+      ActionPosition.pre => preActionController?.hasExpandedAt(index) ?? false,
+      ActionPosition.post =>
+        postActionController?.hasExpandedAt(index) ?? false,
+      _ => false,
+    };
+  }
 }

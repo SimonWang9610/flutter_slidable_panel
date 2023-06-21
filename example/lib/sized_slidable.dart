@@ -9,13 +9,14 @@ class SizedSlidableExample extends StatefulWidget {
 }
 
 class _SizedSlidableExampleState extends State<SizedSlidableExample> {
-  final SlideController _slideController = SlideController();
-  final ActionController _actionController = ActionController();
+  final SlideController _slideController = SlideController(
+    usePreActionController: true,
+    usePostActionController: true,
+  );
 
   @override
   void dispose() {
     _slideController.dispose();
-    _actionController.dispose();
     super.dispose();
   }
 
@@ -30,47 +31,58 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
           controller: _slideController,
           maxSlideThreshold: 0.8,
           axis: Axis.horizontal,
-          preActionPanel: SlideActionPanel(
-            actionLayout: ActionLayout.spaceEvenly(ActionMotion.scroll),
-            slidePercent: _slideController.slidePercent,
-
-            /// bind [ActionController] with the [SlideActionPanel]
-            controller: _actionController,
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _actionController.toggle(0);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
-                  shape: const RoundedRectangleBorder(),
-                ),
-                child: const Text("Archive"),
+          preActions: [
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(0);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.greenAccent,
+                shape: const RoundedRectangleBorder(),
               ),
-              TextButton(
-                onPressed: () {
-                  _actionController.toggle(1);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: const RoundedRectangleBorder(),
-                ),
-                child: const Text("Delete"),
+              child: const Text("PreAction"),
+            ),
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(1);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: const RoundedRectangleBorder(),
               ),
-            ],
-          ),
+              child: const Text("PreAction"),
+            ),
+          ],
+          postActions: [
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(0);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.greenAccent,
+                shape: const RoundedRectangleBorder(),
+              ),
+              child: const Text("PostAction"),
+            ),
+            TextButton(
+              onPressed: () {
+                _slideController.toggleAction(1);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: const RoundedRectangleBorder(),
+              ),
+              child: const Text("PostAction"),
+            ),
+          ],
           child: GestureDetector(
             onTap: () {
-              _slideController.dismiss(
-                onDismissed: () {
-                  _actionController.reset();
-                },
-              );
+              _slideController.dismiss();
             },
             child: const DecoratedBox(
               decoration: BoxDecoration(color: Colors.blue),
               child: SizedBox(
-                width: 200,
+                width: 250,
                 height: 100,
                 child: Center(
                   child: Text(

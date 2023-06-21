@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../renders/slide_action_render.dart';
+import '../renders/slidable_render.dart';
 import '../delegates/action_layout_delegate.dart';
-import '../controllers/action_controller.dart';
 import '../models.dart';
 
 /// By wrapping [child] using [ActionItem], you can specify the flex value of the child.
@@ -50,26 +49,33 @@ class ActionItem extends ParentDataWidget<SlideActionBoxData> {
 /// [slidePercent] should be from [SlideController.slidePercent]
 class SlideActionPanel<T extends Widget> extends MultiChildRenderObjectWidget {
   final ActionLayout actionLayout;
-  final ValueListenable<double> slidePercent;
   final List<T> actions;
-  final ActionController? controller;
+  final ActionPosition position;
 
   const SlideActionPanel({
     Key? key,
     required this.actionLayout,
     required this.actions,
-    required this.slidePercent,
-    this.controller,
+    required this.position,
   }) : super(
           key: key,
           children: actions,
         );
 
+  /// although this [RenderSlideAction] has not been attached to [RenderSlidable] during [createRenderObject],
+  /// its [Element] has been mounted to the element tree.
+  /// Therefore, we can use [BuildContext.findAncestorRenderObjectOfType] to get the [RenderSlidable]
   @override
   RenderSlideAction createRenderObject(BuildContext context) {
+    final slidableRender = of(context);
+
+    final controller = position == ActionPosition.pre
+        ? slidableRender.preActionController
+        : slidableRender.postActionController;
+
     return RenderSlideAction(
       actionLayout: actionLayout,
-      slidePercent: slidePercent,
+      slidePercent: slidableRender.slidePercent,
       controller: controller,
     );
   }
@@ -77,9 +83,27 @@ class SlideActionPanel<T extends Widget> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(
       BuildContext context, covariant RenderSlideAction renderObject) {
+    final slidableRender = of(context);
+    final controller = position == ActionPosition.pre
+        ? slidableRender.preActionController
+        : slidableRender.postActionController;
+
     renderObject
       ..actionLayout = actionLayout
-      ..slidePercent = slidePercent
+      ..slidePercent = slidableRender.slidePercent
       ..controller = controller;
+  }
+
+  static RenderSlidable of(BuildContext context) {
+    final slidableRender =
+        context.findAncestorRenderObjectOfType<RenderSlidable>();
+
+    assert(
+      slidableRender != null,
+      'RenderSlideAction must be a descendant of RenderSlidable.'
+      'Typically, it means [SlideActionPanel] must be a descendant of [SlidablePanel].',
+    );
+
+    return slidableRender!;
   }
 }

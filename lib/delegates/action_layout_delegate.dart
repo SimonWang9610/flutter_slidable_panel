@@ -4,20 +4,20 @@ import '../renders/slide_action_render.dart' show SlideActionBoxData;
 import '../controllers/action_controller.dart';
 import '../models.dart';
 
-/// [BaseActionLayoutDelegate] is a base class for laying out [SlideActionPanel]
-/// [RenderSlideAction] would always create a new [BaseActionLayoutDelegate] from [ActionLayout],
+/// [ActionLayoutDelegate] is a base class for laying out [SlideActionPanel]
+/// [RenderSlideAction] would always create a new [ActionLayoutDelegate] from [ActionLayout],
 /// and will invoke [layout] when doing [RenderSlideAction.performLayout]
-abstract class BaseActionLayoutDelegate {
+abstract class ActionLayoutDelegate {
   final ActionPosition position;
   final ActionMotion motion;
   final ActionController? controller;
-  BaseActionLayoutDelegate({
+  ActionLayoutDelegate({
     required this.position,
     required this.motion,
     this.controller,
   });
 
-  /// different [BaseActionLayoutDelegate] may return different [SizedConstraints] in [getSizedConstraints]
+  /// different [ActionLayoutDelegate] may return different [SizedConstraints] in [getSizedConstraints]
   /// so that each action item could be laid out using s specific [BoxConstraints]
   /// and each action item would be positioned at a specific offset calculated by [getRelativeOffset]
   void layout(
@@ -113,7 +113,7 @@ abstract class BaseActionLayoutDelegate {
   /// if [controller] is not null, the [controller]'s index would be expanded to occupy the total space of the [SlideActionPanel]
   /// the other action items would be compressed to empty during animation of the [controller]
   /// if [controller] is null, all action items would have the same ratio and be laid out normally
-  /// based on the subclasses of [BaseActionLayoutDelegate]
+  /// based on the subclasses of [ActionLayoutDelegate]
   (double, double) get _itemControllerRatios {
     final unExpandedRatio = 1 - (controller?.progress ?? 0.0);
     final expandedRatio = 1 + (controller?.progress ?? 0.0);
@@ -151,8 +151,8 @@ abstract class BaseActionLayoutDelegate {
   }
 }
 
-class SpaceEvenlyLayoutDelegate extends BaseActionLayoutDelegate {
-  SpaceEvenlyLayoutDelegate({
+class _SpaceEvenlyLayoutDelegate extends ActionLayoutDelegate {
+  _SpaceEvenlyLayoutDelegate({
     required super.motion,
     required super.position,
     super.controller,
@@ -218,9 +218,9 @@ class SpaceEvenlyLayoutDelegate extends BaseActionLayoutDelegate {
   }
 }
 
-class FlexLayoutDelegate extends BaseActionLayoutDelegate {
+class _FlexLayoutDelegate extends ActionLayoutDelegate {
   final List<int> flexes = [];
-  FlexLayoutDelegate({
+  _FlexLayoutDelegate({
     required super.motion,
     required super.position,
     super.controller,
@@ -318,6 +318,10 @@ class FlexLayoutDelegate extends BaseActionLayoutDelegate {
   }
 }
 
+/// describe how to layout action items in [RenderSlideAction]
+/// [ActionLayout.spaceEvenly] would layout action items with equal space
+/// [ActionLayout.flex] would layout action items according to their flex value
+/// it would [buildDelegate] to create a [ActionLayoutDelegate] when [RenderSlideAction.performLayout] is invoked
 class ActionLayout {
   final ActionMotion motion;
 
@@ -330,19 +334,19 @@ class ActionLayout {
     required this.alignment,
   });
 
-  BaseActionLayoutDelegate buildDelegate(
+  ActionLayoutDelegate buildDelegate(
     ActionPosition position, {
     ActionController? controller,
   }) {
     switch (alignment) {
       case ActionAlignment.spaceEvenly:
-        return SpaceEvenlyLayoutDelegate(
+        return _SpaceEvenlyLayoutDelegate(
           motion: motion,
           position: position,
           controller: controller,
         );
       case ActionAlignment.flex:
-        return FlexLayoutDelegate(
+        return _FlexLayoutDelegate(
           motion: motion,
           position: position,
           controller: controller,
