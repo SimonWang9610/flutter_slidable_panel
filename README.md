@@ -169,6 +169,43 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
   );
 ```
 
+### use different motion and alignment at different positions
+
+`SlidablePanel.preActionLayout` and `SlidablePanel.postActionLayout` accept `ActionLayout` as parameters.
+
+1. You could determine how to layout the actions at the different positions by specifying:
+
+   > when using `ActionAlignment.flex`, you could give an action a specific flex value using `ActionItem`. Other actions not wrapped in `ActionItem` would have a default flex value of 1.
+
+   > `ActionAlignment.spaceEvenly` would ignore `ActionItem`
+
+```dart
+ActionLayout(
+  alignment: ActionAlignment.spaceEvenly || ActionAlignment.flex,
+)
+```
+
+2. You could also determine which motion to use:
+
+```dart
+ActionLayout(
+  motion: ActionMotion.behind || ActionMotion.drawer || ActionMotion.scroll
+)
+```
+
+### Do something when starting sliding
+
+You could set `onSlideStart` to do some work when starting sliding,
+e.g., you want to dismiss all other `SlidablePanel` when starting sliding.
+
+```dart
+SlidablePanel(
+  /// other code
+  onSlideStart: <your function>,
+  /// other code
+)
+```
+
 ## Use `SlideController` programmatically
 
 ### open the panel

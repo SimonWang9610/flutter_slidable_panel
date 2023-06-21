@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_slidable_panel/flutter_slidable_panel.dart';
 
-/// use [ActionController] to control the animation of [SlideActionPanel] when the [SlidablePanel] is open
+/// use [ActionController] to control the animation of [SlideActionPanel] when the [SlidablePanel] is open.
 /// for example, you can use [ActionController] to expand the action item to fill the entire [SlideActionPanel]
 final class ActionController extends TickerProvider with ChangeNotifier {
   late final AnimationController _animationController = AnimationController(
@@ -19,13 +19,13 @@ final class ActionController extends TickerProvider with ChangeNotifier {
 
   int? _index;
 
-  /// [index] would be the index of action items of [SlideActionPanel.actions]
+  /// [index] would be the index of action items of [SlideActionPanel.actions],
   /// whatever the [ActionPosition] of [SlideActionPanel] is
   int? get index => _index;
 
-  /// the current progress of the animation during expanding or collapsing
-  /// it indicates the [index] item is expanding if the progress is increasing from 0 to 1
-  /// it indicates the [index] item is collapsing if the progress is decreasing from 1 to 0
+  /// the current progress of the animation during expanding or collapsing,
+  /// it indicates the [index] item is expanding if the progress is increasing from 0 to 1,
+  /// it indicates the [index] item is collapsing if the progress is decreasing from 1 to 0,
   double get progress => _animationController.value;
 
   /// expand the [index] item to occupy the entire [SlideActionPanel]

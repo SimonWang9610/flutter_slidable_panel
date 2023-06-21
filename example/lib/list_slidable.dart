@@ -71,6 +71,9 @@ class _SlidableListTileState extends State<SlidableListTile> {
       controller: _slideController,
       maxSlideThreshold: 0.8,
       axis: Axis.horizontal,
+      onSlideStart: () {
+        print("onSlideStart: ${widget.index}");
+      },
       preActions: [
         TextButton(
           onPressed: () {
