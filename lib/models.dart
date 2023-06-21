@@ -28,6 +28,10 @@ enum ActionAlignment {
   flex,
 }
 
+/// the layout result of [RenderSLidable]
+/// [size] is the size of [SlidablePanel.child]
+/// [hasPreAction] indicates whether there has [SlideActionPanel] at [ActionPosition.pre]
+/// [hasPostAction] indicates whether there has [SlideActionPanel] at [ActionPosition.post]
 class LayoutSize {
   final Size size;
   final bool hasPreAction;
@@ -43,8 +47,10 @@ class LayoutSize {
     required this.maxSlideThreshold,
   });
 
-  /// if no action, return null
+  /// if no [SlideActionPanel], return null
   /// by doing so, we could disable sliding if no actions along the [axis]
+  /// the ratio would be calculated: [dragExtent] / slidable space along the [axis]
+  /// the slidable space is calculated by [maxSlideThreshold] * the space along the [axis]
   double? getRatio(
     double dragExtent,
   ) {
@@ -60,8 +66,8 @@ class LayoutSize {
     return ratio;
   }
 
-  /// [ratio] > 0  indicates we are sliding to see the pre actions
-  /// [ratio] < 0  indicates we are sliding to see the post actions
+  /// according to [direction], [ratio] and [isForward]
+  /// calculate the target ratio when we should continue to slide after dragging ends
   double getToggleTarget(
       SlideDirection direction, double ratio, bool isForward) {
     if (ratio >= 0 && !hasPreAction) {
@@ -81,6 +87,8 @@ class LayoutSize {
     };
   }
 
+  /// calculate the final drag extent after animating ends
+  /// so that the next dragging could start from the previous drag extent
   double getDragExtent(double ratio) {
     final mainAxis = axis == Axis.horizontal
         ? size.width * maxSlideThreshold
@@ -88,6 +96,8 @@ class LayoutSize {
     return mainAxis * ratio;
   }
 
+  /// calculate the target ratio when we want to open the panel at [position]
+  /// if there is no [SlideActionPanel] at [position], return null
   double? getOpenTarget(ActionPosition position) {
     if (position == ActionPosition.pre && !hasPreAction) {
       return null;
@@ -102,6 +112,9 @@ class LayoutSize {
   }
 }
 
+/// [SizedConstraints] is used to calculate the constraints for the pre/post actions
+/// [constraints]'s length should be the same as the number of actions at the corresponding [ActionPosition]
+/// typically, it would be calculated by [BaseActionLayoutDelegate]
 class SizedConstraints {
   final Size size;
   final List<BoxConstraints> constraints;
@@ -137,6 +150,7 @@ class SizedConstraints {
     return shift;
   }
 
+  /// all [BoxConstraints] in [constraints] would be calculated according to the [size]
   Offset get totalShift {
     final shift = switch (axis) {
       Axis.horizontal => Offset(size.width, 0),

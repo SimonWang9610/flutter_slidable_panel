@@ -1,7 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_slidable_panel/flutter_slidable_panel.dart';
 
-import '../controllers/slide_controller.dart';
-import '../models.dart';
+import '../controllers/action_controller.dart';
 import 'slide_action_render.dart';
 
 class SlidableBoxData extends ContainerBoxParentData<RenderBox> {
@@ -59,6 +60,11 @@ class RenderSlidable extends RenderBox
       }
     }
   }
+
+  ValueListenable<double> get slidePercent => _controller.slidePercent;
+  ActionController? get preActionController => _controller.preActionController;
+  ActionController? get postActionController =>
+      _controller.postActionController;
 
   @override
   void attach(PipelineOwner owner) {

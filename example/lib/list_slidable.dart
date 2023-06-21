@@ -55,13 +55,13 @@ class SlidableListTile extends StatefulWidget {
 }
 
 class _SlidableListTileState extends State<SlidableListTile> {
-  final SlideController _slideController = SlideController();
-  final ActionController _actionController = ActionController();
+  final SlideController _slideController = SlideController(
+    usePreActionController: true,
+  );
 
   @override
   void dispose() {
     _slideController.dispose();
-    _actionController.dispose();
     super.dispose();
   }
 
@@ -71,51 +71,38 @@ class _SlidableListTileState extends State<SlidableListTile> {
       controller: _slideController,
       maxSlideThreshold: 0.8,
       axis: Axis.horizontal,
-      preActionPanel: SlideActionPanel(
-        controller: _actionController,
-        slidePercent: _slideController.slidePercent,
-        actionLayout: ActionLayout.spaceEvenly(ActionMotion.scroll),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _actionController.toggle(0);
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.greenAccent,
-              shape: const RoundedRectangleBorder(),
-            ),
-            child: const Text("Archive"),
+      preActions: [
+        TextButton(
+          onPressed: () {
+            _slideController.preActionController?.toggle(0);
+          },
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.greenAccent,
+            shape: const RoundedRectangleBorder(),
           ),
-          TextButton(
-            onPressed: () {
-              final expanded = _actionController.hasExpandedAt(1);
+          child: const Text("Archive"),
+        ),
+        TextButton(
+          onPressed: () {
+            final expanded = _slideController.hasExpandedAt(1);
 
-              if (expanded) {
-                _slideController.dismiss(
-                  onDismissed: () {
-                    _actionController.reset();
-                  },
-                );
-                widget.onDeleted?.call();
-              } else {
-                _actionController.expand(1);
-              }
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: const RoundedRectangleBorder(),
-            ),
-            child: const Text("Delete"),
+            if (expanded) {
+              _slideController.dismiss();
+              widget.onDeleted?.call();
+            } else {
+              _slideController.expand(0);
+            }
+          },
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+            shape: const RoundedRectangleBorder(),
           ),
-        ],
-      ),
+          child: const Text("Delete"),
+        ),
+      ],
       child: TextButton(
         onPressed: () {
-          _slideController.dismiss(
-            onDismissed: () {
-              _actionController.reset();
-            },
-          );
+          _slideController.dismiss();
         },
         style: TextButton.styleFrom(
           backgroundColor: Colors.white,

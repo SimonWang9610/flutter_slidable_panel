@@ -1,6 +1,8 @@
 name: flutter_slidable_panel
-description: A Slidable Panel that can show actions in different positions. Also can expand the action item when the panel is opening.
-version: 1.0.0
+description:
+  A high-performant slidable Panel that can show actions in different positions,
+  and also can expand the action item when the panel is opening
+version: 1.1.0
 homepage: https://github.com/SimonWang9610/flutter_slidable_panel
 repository: https://github.com/SimonWang9610/flutter_slidable_panel
 
