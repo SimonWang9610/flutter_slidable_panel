@@ -89,6 +89,12 @@ class SlidablePanel extends StatelessWidget {
   /// since no content could be shown
   final List<Widget>? postActions;
 
+  /// invoke when the panel starts to slide
+  /// as long as there are some actions, [onSlideStart] would be invoked if provided
+  /// by providing [onSlideStart], you can do some work when the panel starts to slide,
+  /// e.g., dismiss other [SlidablePanel]s
+  final VoidCallback? onSlideStart;
+
   const SlidablePanel({
     super.key,
     required this.child,
@@ -105,6 +111,7 @@ class SlidablePanel extends StatelessWidget {
     ),
     this.preActions,
     this.postActions,
+    this.onSlideStart,
   }) : assert(
           maxSlideThreshold >= 0 && maxSlideThreshold <= 1,
           'maxSlideThreshold should be in [0, 1]',
@@ -129,6 +136,8 @@ class SlidablePanel extends StatelessWidget {
         : null;
 
     return GestureDetector(
+      onHorizontalDragStart: axis == Axis.horizontal ? _onDragStart : null,
+      onVerticalDragStart: axis == Axis.vertical ? _onDragStart : null,
       onHorizontalDragUpdate:
           axis == Axis.horizontal ? controller.onDragUpdate : null,
       onVerticalDragUpdate:
@@ -148,5 +157,14 @@ class SlidablePanel extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _onDragStart(DragStartDetails details) {
+    final hasActions = preActions != null && preActions!.isNotEmpty ||
+        postActions != null && postActions!.isNotEmpty;
+
+    if (hasActions) {
+      onSlideStart?.call();
+    }
   }
 }
