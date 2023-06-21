@@ -15,6 +15,8 @@ A high-performant slidable Panel that can show actions in different positions, a
 
 ## Features
 
+> this package uses some syntax sugar of Dart 3.0, please create issues if you want to use this package in Dart 2.x, I will remove those syntax sugars and migrate it to Dart 2.x
+
 1. When the panel is closed/dismissed, no actions would be painted and laid out.
 2. The animation of actions (e.g., expanding/collapsing a specific action) will be scoped and not result in the re-layout and re-painting of the entire `SlidablePanel`
 3. control the `SlidablePanel` and actions programmatically using `SlideController`, not limited to gestures.
