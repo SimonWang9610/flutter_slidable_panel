@@ -1,3 +1,7 @@
+## 1.1.2
+
+- [fix]: [Issue 5](https://github.com/SimonWang9610/flutter_slidable_panel/issues/5)
+
 ## 1.1.1
 
 - enable `onSlideStart` for `SlidablePanel`
