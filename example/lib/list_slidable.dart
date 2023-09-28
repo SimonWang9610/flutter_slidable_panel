@@ -71,6 +71,7 @@ class _SlidableListTileState extends State<SlidableListTile> {
       controller: _slideController,
       maxSlideThreshold: 0.8,
       axis: Axis.horizontal,
+      preActionLayout: ActionLayout.spaceEvenly(ActionMotion.drawer),
       onSlideStart: () {
         print("onSlideStart: ${widget.index}");
       },
@@ -80,8 +81,9 @@ class _SlidableListTileState extends State<SlidableListTile> {
             _slideController.preActionController?.toggle(0);
           },
           style: TextButton.styleFrom(
-            backgroundColor: Colors.greenAccent,
-            shape: const RoundedRectangleBorder(),
+            // backgroundColor: Colors.greenAccent,
+            // shape: const RoundedRectangleBorder(),
+            side: const BorderSide(color: Colors.black),
           ),
           child: const Text("Archive"),
         ),
@@ -93,12 +95,13 @@ class _SlidableListTileState extends State<SlidableListTile> {
               _slideController.dismiss();
               widget.onDeleted?.call();
             } else {
-              _slideController.expand(0);
+              _slideController.expand(1);
             }
           },
           style: TextButton.styleFrom(
             backgroundColor: Colors.redAccent,
-            shape: const RoundedRectangleBorder(),
+            // shape: const RoundedRectangleBorder(),
+            side: const BorderSide(color: Colors.black),
           ),
           child: const Text("Delete"),
         ),
@@ -107,9 +110,13 @@ class _SlidableListTileState extends State<SlidableListTile> {
         onPressed: () {
           _slideController.dismiss();
         },
+
+        ///! TextButton padding may cause the visual glitch of the action items compared to the main child
+        ///! depending on the platform, you may need to adjust the padding of the main child
         style: TextButton.styleFrom(
           backgroundColor: Colors.white,
-          shape: const RoundedRectangleBorder(),
+          // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          // shape: const RoundedRectangleBorder(),
           side: const BorderSide(color: Colors.black),
         ),
         child: Text(widget.title),
