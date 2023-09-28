@@ -27,7 +27,7 @@ abstract class ActionLayoutDelegate {
     double ratio = 1.0,
     required Axis axis,
   }) {
-    assert(!size.isEmpty && childCount > 0);
+    assert(childCount > 0);
 
     final sizedConstraints = getSizedConstraints(
       size: size,
@@ -40,7 +40,9 @@ abstract class ActionLayoutDelegate {
     int index = 0;
 
     while (current != null) {
-      current.layout(sizedConstraints.constraints[index], parentUsesSize: true);
+      current.layout(sizedConstraints.constraints[index],
+          parentUsesSize: false);
+
       final parentData = current.parentData as SlideActionBoxData;
 
       parentData.offset = getRelativeOffset(
@@ -164,7 +166,8 @@ class _SpaceEvenlyLayoutDelegate extends ActionLayoutDelegate {
     required Axis axis,
     required int childCount,
   }) {
-    assert(!size.isEmpty && childCount > 0);
+    // assert(!size.isEmpty && childCount > 0);
+    assert(childCount > 0);
 
     final averageWidth = size.width / childCount;
     final averageHeight = size.height / childCount;
@@ -181,21 +184,27 @@ class _SpaceEvenlyLayoutDelegate extends ActionLayoutDelegate {
 
       switch (axis) {
         case Axis.horizontal:
+          final width = indexExpanded
+              ? averageWidth * expandedRatio
+              : averageWidth * unExpandedRatio;
+          final height = width != 0 ? size.height : 0.0;
+
           final indexConstraints = BoxConstraints.tightFor(
-            width: indexExpanded
-                ? averageWidth * expandedRatio
-                : averageWidth * unExpandedRatio,
-            height: size.height,
+            width: width,
+            height: height,
           );
           remainWidth -= indexConstraints.maxWidth;
           constraints.add(indexConstraints);
           break;
         case Axis.vertical:
+          final height = indexExpanded
+              ? averageHeight * expandedRatio
+              : averageHeight * unExpandedRatio;
+
+          final width = height != 0 ? size.width : 0.0;
           final indexConstraints = BoxConstraints.tightFor(
-            width: size.width,
-            height: indexExpanded
-                ? averageHeight * expandedRatio
-                : averageHeight * unExpandedRatio,
+            width: width,
+            height: height,
           );
           remainHeight -= indexConstraints.maxHeight;
           constraints.add(indexConstraints);
@@ -234,7 +243,8 @@ class _FlexLayoutDelegate extends ActionLayoutDelegate {
     double ratio = 1.0,
     required Axis axis,
   }) {
-    assert(!size.isEmpty && childCount > 0);
+    assert(childCount > 0);
+
     flexes.clear();
     RenderBox? current = child;
 
@@ -280,22 +290,27 @@ class _FlexLayoutDelegate extends ActionLayoutDelegate {
 
       switch (axis) {
         case Axis.horizontal:
+          final width = indexExpanded
+              ? widthForEachFlex * flex * expandedRatio
+              : widthForEachFlex * flex * unExpandedRatio;
+
+          final height = width != 0 ? size.height : 0.0;
           final indexConstraints = BoxConstraints.tightFor(
-            width: indexExpanded
-                ? widthForEachFlex * flex * expandedRatio
-                : widthForEachFlex * flex * unExpandedRatio,
-            height: size.height,
+            width: width,
+            height: height,
           );
           remainWidth -= indexConstraints.maxWidth;
           constraints.add(indexConstraints);
           break;
 
         case Axis.vertical:
+          final height = indexExpanded
+              ? heightForEachFlex * flex * expandedRatio
+              : heightForEachFlex * flex * unExpandedRatio;
+          final width = height != 0 ? size.width : 0.0;
           final indexConstraints = BoxConstraints.tightFor(
-            width: size.width,
-            height: indexExpanded
-                ? heightForEachFlex * flex * expandedRatio
-                : heightForEachFlex * flex * unExpandedRatio,
+            width: width,
+            height: height,
           );
           remainHeight -= indexConstraints.maxHeight;
           constraints.add(indexConstraints);

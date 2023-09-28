@@ -31,6 +31,7 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
           controller: _slideController,
           maxSlideThreshold: 0.8,
           axis: Axis.horizontal,
+          preActionLayout: ActionLayout.flex(),
           preActions: [
             TextButton(
               onPressed: () {

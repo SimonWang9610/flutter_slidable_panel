@@ -134,7 +134,7 @@ class RenderSlideAction extends RenderBox
     final child = firstChild;
     final position = (parentData as SlidableBoxData).position!;
 
-    if (child == null || size.isEmpty) {
+    if (child == null) {
       return;
     }
 
@@ -156,6 +156,7 @@ class RenderSlideAction extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (size.isEmpty) return;
+
     context.pushClipRect(
       needsCompositing,
       offset,
