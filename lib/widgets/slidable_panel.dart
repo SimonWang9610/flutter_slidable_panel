@@ -95,6 +95,12 @@ class SlidablePanel extends StatelessWidget {
   /// e.g., dismiss other [SlidablePanel]s
   final VoidCallback? onSlideStart;
 
+  /// [gestureDisabled] would be used to determine whether the panel should be able to slide using gestures
+  /// if true, users can only slide the panel via [SlideController] programmatically;
+  /// if false, users can slide the panel via gestures or [SlideController] programmatically;
+  /// defaults to false
+  final bool gestureDisabled;
+
   const SlidablePanel({
     super.key,
     required this.child,
@@ -112,6 +118,7 @@ class SlidablePanel extends StatelessWidget {
     this.preActions,
     this.postActions,
     this.onSlideStart,
+    this.gestureDisabled = false,
   }) : assert(
           maxSlideThreshold >= 0 && maxSlideThreshold <= 1,
           'maxSlideThreshold should be in [0, 1]',
@@ -135,7 +142,22 @@ class SlidablePanel extends StatelessWidget {
           )
         : null;
 
-    return GestureDetector(
+    assert(() {
+      if (controller.initOpenedPosition == null) {
+        return true;
+      } else if (preActionPanel != null &&
+          controller.initOpenedPosition == ActionPosition.pre) {
+        return true;
+      } else if (postActionPanel != null &&
+          controller.initOpenedPosition == ActionPosition.post) {
+        return true;
+      } else {
+        return false;
+      }
+    }(),
+        "Bad usage of SlidableController.initOpenedPosition, ensure there are actions at ${controller.initOpenedPosition}");
+
+    final widget = GestureDetector(
       onHorizontalDragStart: axis == Axis.horizontal ? _onDragStart : null,
       onVerticalDragStart: axis == Axis.vertical ? _onDragStart : null,
       onHorizontalDragUpdate:
@@ -156,6 +178,11 @@ class SlidablePanel extends StatelessWidget {
           if (postActionPanel != null) postActionPanel,
         ],
       ),
+    );
+
+    return IgnorePointer(
+      ignoring: gestureDisabled,
+      child: widget,
     );
   }
 

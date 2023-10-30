@@ -1,3 +1,9 @@
+## 1.1.3
+
+- [feat] support `initOpenedPosition` when initializing `SlideController`.
+  - Idea from [issue](https://github.com/SimonWang9610/flutter_slidable_panel/issues/4)
+- [feat] support only sliding via `SlideController` and disabling gesture sliding
+
 ## 1.1.2
 
 - [fix]: [Issue 5](https://github.com/SimonWang9610/flutter_slidable_panel/issues/5)
