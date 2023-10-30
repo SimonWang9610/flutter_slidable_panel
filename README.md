@@ -44,6 +44,32 @@ A high-performant slidable Panel that can show actions in different positions, a
     <img src="https://github.com/SimonWang9610/flutter_slidable_panel/blob/main/images/behind_motion.gif?raw=true" width="320">
 </div>
 
+### Disable gesture sliding
+
+By setting `gestureDisabled: true`, you could avoid gesture sliding and continue sliding via `SlideController` programmatically
+
+```dart
+SlidablePanel(
+  ...
+  gestureDisabled: true,
+  ...
+)
+```
+
+### Initial Opened Position
+
+By specifying the `initOpenedPosition` of `SlideController`, you could open actions at the `initOpenedPosition` without using `WidgetsBinding.instance.addPostFrameCallback`.
+
+> you should ensure there are actions at the specified `initOpenedPosition`
+
+```dart
+  final SlideController _slideController = SlideController(
+    usePreActionController: true,
+    usePostActionController: true,
+    initOpenedPosition: ActionPosition.pre,
+  );
+```
+
 ## Getting started
 
 ```dart

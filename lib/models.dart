@@ -110,6 +110,32 @@ class LayoutSize {
       ActionPosition.post => -1,
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is LayoutSize &&
+        other.size == size &&
+        other.hasPreAction == hasPreAction &&
+        other.hasPostAction == hasPostAction &&
+        other.axis == axis &&
+        other.maxSlideThreshold == maxSlideThreshold;
+  }
+
+  @override
+  int get hashCode {
+    return size.hashCode ^
+        hasPreAction.hashCode ^
+        hasPostAction.hashCode ^
+        axis.hashCode ^
+        maxSlideThreshold.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'LayoutSize(size: $size, hasPreAction: $hasPreAction, hasPostAction: $hasPostAction, axis: $axis, maxSlideThreshold: $maxSlideThreshold)';
+  }
 }
 
 /// [SizedConstraints] is used to calculate the constraints for the pre/post actions

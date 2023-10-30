@@ -12,6 +12,7 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
   final SlideController _slideController = SlideController(
     usePreActionController: true,
     usePostActionController: true,
+    initOpenedPosition: ActionPosition.pre,
   );
 
   @override
@@ -26,11 +27,22 @@ class _SizedSlidableExampleState extends State<SizedSlidableExample> {
       appBar: AppBar(
         title: const Text('Sized Slidable Example'),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_slideController.dismissed) {
+            _slideController.open();
+          } else {
+            _slideController.dismiss();
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
       body: Center(
         child: SlidablePanel(
           controller: _slideController,
           maxSlideThreshold: 0.8,
           axis: Axis.horizontal,
+          gestureDisabled: true,
           preActionLayout: ActionLayout.flex(),
           preActions: [
             TextButton(

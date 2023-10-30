@@ -42,11 +42,22 @@ class SlideController extends SlideAnimator
   /// using [toggleAction], [expand] or [collapse] to control the actions at [ActionPosition.post]
   final bool usePostActionController;
 
+  /// the initial opened position of the [SlidablePanel]
+  /// if null, the [SlidablePanel] would be closed/dismissed initially;
+  /// otherwise, the [SlidablePanel] would be opened at the [initOpenedPosition] without animation.
+  ///
+  /// if there are no actions at [initOpenedPosition], it would throw assertion error in debug mode;
+  /// in release mode, it would paint nothing.
+  final ActionPosition? initOpenedPosition;
+
   SlideController({
     this.usePreActionController = false,
     this.usePostActionController = false,
+    this.initOpenedPosition,
     this.slideTolerance = _kSlideRatioTolerance,
   }) : assert(slideTolerance >= 0 && slideTolerance <= 1) {
+    _initPositionView(initOpenedPosition);
+
     _animationController.addListener(() {
       notifyListeners();
     });
@@ -162,11 +173,21 @@ class SlideAnimator extends TickerProvider with ChangeNotifier {
   @override
   Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
 
-  late final AnimationController _animationController = AnimationController(
-    vsync: this,
-    lowerBound: _lowerBound,
-    upperBound: _upperBound,
-  )..value = _middleBound;
+  late final AnimationController _animationController;
+
+  void _initPositionView(ActionPosition? initOpenedPosition) {
+    final value = switch (initOpenedPosition) {
+      ActionPosition.pre => _upperBound,
+      ActionPosition.post => _lowerBound,
+      _ => _middleBound,
+    };
+
+    _animationController = AnimationController(
+      vsync: this,
+      lowerBound: _lowerBound,
+      upperBound: _upperBound,
+    )..value = value;
+  }
 
   set _animationValue(double value) {
     _animationController.value = value;
@@ -194,12 +215,26 @@ mixin DragForSlide on SlideAnimator {
   /// the layout result of [RenderSlidable] for all actions
   LayoutSize? get layoutSize => _layoutSize;
 
+  /// only take effects once when a initial position is provided
+  bool _syncDragExtentOnce = false;
+
+  @override
+  void _initPositionView(ActionPosition? initOpenedPosition) {
+    super._initPositionView(initOpenedPosition);
+    _syncDragExtentOnce = initOpenedPosition != null;
+  }
+
   /// the layout result of [RenderSlidable]
   /// it will be set instantly after [RenderSlidable.performLayout]
   /// users must not set it manually
   set layoutSize(LayoutSize? layoutSize) {
     if (_layoutSize != layoutSize) {
       _layoutSize = layoutSize;
+    }
+
+    if (_syncDragExtentOnce) {
+      _dragExtent = layoutSize?.getDragExtent(ratio) ?? 0;
+      _syncDragExtentOnce = false;
     }
   }
 
@@ -251,6 +286,7 @@ mixin DragForSlide on SlideAnimator {
     };
     _forwarding = _dragExtent * shift > 0;
     _dragExtent += shift;
+    // print("forwarding: $_forwarding, direction: $direction");
 
     final newRatio = layoutSize!
         .getRatio(_dragExtent)
