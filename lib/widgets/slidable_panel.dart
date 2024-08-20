@@ -157,7 +157,21 @@ class SlidablePanel extends StatelessWidget {
     }(),
         "Bad usage of SlidableController.initOpenedPosition, ensure there are actions at ${controller.initOpenedPosition}");
 
-    final widget = GestureDetector(
+    final panel = _SlidablePanel(
+      key: key,
+      controller: controller,
+      axis: axis,
+      maxSlideThreshold: maxSlideThreshold,
+      children: [
+        if (preActionPanel != null) preActionPanel,
+        child,
+        if (postActionPanel != null) postActionPanel,
+      ],
+    );
+    if (gestureDisabled) {
+      return panel;
+    }
+    return GestureDetector(
       onHorizontalDragStart: axis == Axis.horizontal ? _onDragStart : null,
       onVerticalDragStart: axis == Axis.vertical ? _onDragStart : null,
       onHorizontalDragUpdate:
@@ -167,22 +181,7 @@ class SlidablePanel extends StatelessWidget {
       onHorizontalDragEnd:
           axis == Axis.horizontal ? controller.onDragEnd : null,
       onVerticalDragEnd: axis == Axis.vertical ? controller.onDragEnd : null,
-      child: _SlidablePanel(
-        key: key,
-        controller: controller,
-        axis: axis,
-        maxSlideThreshold: maxSlideThreshold,
-        children: [
-          if (preActionPanel != null) preActionPanel,
-          child,
-          if (postActionPanel != null) postActionPanel,
-        ],
-      ),
-    );
-
-    return IgnorePointer(
-      ignoring: gestureDisabled,
-      child: widget,
+      child: panel,
     );
   }
 
