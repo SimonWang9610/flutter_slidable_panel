@@ -1,3 +1,7 @@
+## 1.1.4
+
+- [fix] child can not handle gestures [PR](https://github.com/SimonWang9610/flutter_slidable_panel/pull/9)
+
 ## 1.1.3
 
 - [feat] support `initOpenedPosition` when initializing `SlideController`.
